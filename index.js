@@ -25,7 +25,12 @@ app.post('/login', async (req, res) => {
       ignoreHTTPSErrors: true,
     };
 
-    browser = await puppeteer.launch(launchOptions);
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: process.env.CHROME_BIN || null,  // Point to the correct Chrome binary
+    });
+    
     const page = await browser.newPage();
     await page.goto(url);
 
