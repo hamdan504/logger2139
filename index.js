@@ -1,0 +1,94 @@
+const express = require('express');
+const puppeteer = require('puppeteer');
+const path = require('path');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve the HTML form
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.post('/login', async (req, res) => {
+  const { url, email, password } = req.body;
+
+  let browser = null;
+  try {
+    const launchOptions = {
+      headless: false,  // Run in non-headless mode
+      slowMo: 100,  // Slow down operations by 100ms
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      ignoreHTTPSErrors: true,
+    };
+
+    browser = await puppeteer.launch(launchOptions);
+    const page = await browser.newPage();
+    await page.goto(url);
+
+    // Click email login button based on the div content
+    await page.waitForSelector("div.choose-btn");
+    const emailButton = await page.evaluateHandle(() => {
+      const buttons = document.querySelectorAll("div.choose-btn");
+      return Array.from(buttons).find(btn => btn.textContent.trim() === "Email");
+    });
+
+    if (emailButton) {
+      await emailButton.click();
+    }
+
+    // Fill in email and password
+    await page.waitForSelector("input[type='text'][placeholder='Please enter your email address']");
+    await page.type("input[type='text'][placeholder='Please enter your email address']", email);
+    await page.type("input[type='password'][placeholder='Please enter your password']", password);
+
+    // Click login button
+    await page.waitForSelector("div.login-btn");
+    await page.click("div.login-btn");
+
+    // Wait for navigation
+    await page.waitForNavigation();
+
+    if (page.url() !== url) {
+      // Navigate to trade URL
+      await page.goto("https://2139.online/pc/#/contractTransaction");
+
+      // Click "invited me" button
+      await page.waitForSelector("div.choose-btn");
+      const invitedMeButton = await page.$("div.choose-btn");
+      await invitedMeButton.click();
+
+      // Wait for and click "Confirm to follow the order" if it exists
+      try {
+        await page.waitForSelector("div:contains(' Confirm to follow the order')", { timeout: 5000 });
+        const confirmOrderButton = await page.$("div:contains(' Confirm to follow the order')");
+        await confirmOrderButton.click();
+
+        await page.waitForSelector("button span:contains('Confirm')", { timeout: 5000 });
+        const confirmButton = await page.$("button span:contains('Confirm')");
+        await confirmButton.click();
+
+        await page.waitForTimeout(50000);
+        res.status(200).json({ message: "Successfully completed the transaction!" });
+      } catch (error) {
+        await page.waitForTimeout(50000);
+        res.status(200).json({ message: "No transaction found or buttons were not available." });
+      }
+    } else {
+      res.status(400).json({ message: "Login failed or session not maintained properly." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: `Error: ${error.message}` });
+  } finally {
+    if (browser !== null) {
+      await browser.close();
+    }
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
