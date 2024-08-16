@@ -25,25 +25,18 @@ app.post('/login', async (req, res) => {
       ignoreHTTPSErrors: true,
     };
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.CHROME_BIN || null,  // Point to the correct Chrome binary
-    });
-    
+    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.goto(url);
 
-    // Click email login button based on the div content
+    // Wait for the element to appear
     await page.waitForSelector("div.choose-btn");
-    const emailButton = await page.evaluateHandle(() => {
-      const buttons = document.querySelectorAll("div.choose-btn");
-      return Array.from(buttons).find(btn => btn.textContent.trim() === "Email");
+
+    // Click the element by filtering elements with the exact text content
+    await page.evaluate(() => {
+        [...document.querySelectorAll('div.choose-btn')].filter(el => el.innerText === 'Email')[0].click();
     });
 
-    if (emailButton) {
-      await emailButton.click();
-    }
 
     // Fill in email and password
     await page.waitForSelector("input[type='text'][placeholder='Please enter your email address']");
