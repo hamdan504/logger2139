@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const puppeteer = require('puppeteer-core');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,20 +15,19 @@ app.get('/', (req, res) => {
 
 app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
+  let executablePath = '';
   let browser = null;
   try {
-    let puppeteer;
     if (process.env.VERCEL) {
-      puppeteer = require('puppeteer-core');
-      const executablePath = await puppeteer.executablePath();
-      console.log(`Using Chromium at: ${executablePath}`);
+      executablePath = '/usr/bin/google-chrome';
+      // or executablePath = '/usr/bin/chromium-browser';
+      // depending on which browser you want to use
       browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         executablePath,
         headless: true,
       });
     } else {
-      puppeteer = require('puppeteer');
       browser = await puppeteer.launch({
         headless: false,
         slowMo: 100,
