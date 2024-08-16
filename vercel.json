@@ -11,8 +11,5 @@
       "src": "/(.*)",
       "dest": "/index.js"
     }
-  ],
-  "env": {
-    "CHROME_BIN": "/opt/buildhome/.cache/puppeteer/chrome/linux-117.0.5938.149/chrome-linux64/chrome"
-  }
+  ]
 }
