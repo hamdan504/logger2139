@@ -1,3 +1,17 @@
+const express = require('express');
+const path = require('path');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve the HTML form
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
   let browser = null;
@@ -5,8 +19,11 @@ app.post('/login', async (req, res) => {
     let puppeteer;
     if (process.env.VERCEL) {
       puppeteer = require('puppeteer-core');
+      const executablePath = await puppeteer.executablePath();
+      console.log(`Using Chromium at: ${executablePath}`);
       browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath,
         headless: true,
       });
     } else {
@@ -77,4 +94,9 @@ app.post('/login', async (req, res) => {
       await browser.close();
     }
   }
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+  
 });
