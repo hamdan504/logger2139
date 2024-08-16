@@ -21,6 +21,7 @@ app.post('/login', async (req, res) => {
       puppeteer = require('puppeteer-core');
       browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        channel: 'chrome',
         headless: true,
       });
     } else {
@@ -32,6 +33,7 @@ app.post('/login', async (req, res) => {
         ignoreHTTPSErrors: true,
       });
     }
+    
 
     const page = await browser.newPage();
     await page.goto(url);
@@ -94,5 +96,5 @@ app.post('/login', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at this porthttp://localhost:${port}`);
 });
