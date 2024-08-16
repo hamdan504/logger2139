@@ -18,14 +18,11 @@ app.post('/login', async (req, res) => {
   try {
     let puppeteer;
     if (process.env.VERCEL) {
-      puppeteer = require('puppeteer-core');
       browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        channel: 'chrome',
         headless: true,
       });
     } else {
-      puppeteer = require('puppeteer');
       browser = await puppeteer.launch({
         headless: false,
         slowMo: 100,
