@@ -11,9 +11,5 @@
       "src": "/(.*)",
       "dest": "/index.js"
     }
-  ],
-  "env": {
-    "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "false",
-    "PUPPETEER_CACHE_DIR": "/vercel/.cache/puppeteer"
-  }
+  ]
 }

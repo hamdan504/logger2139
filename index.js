@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda'); // Use this to find the Chromium executable on Vercel
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,9 +18,9 @@ app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
   let browser = null;
   try {
-    // Launch Puppeteer
     browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
       headless: true,
     });
 
