@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const puppeteer = require('puppeteer');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,21 +17,10 @@ app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
   let browser = null;
   try {
-    let puppeteer;
-    if (process.env.VERCEL) {
-      browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        headless: true,
-      });
-    } else {
-      browser = await puppeteer.launch({
-        headless: false,
-        slowMo: 100,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        ignoreHTTPSErrors: true,
-      });
-    }
-    
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+    });
 
     const page = await browser.newPage();
     await page.goto(url);
@@ -93,5 +83,5 @@ app.post('/login', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at this porthttp://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
