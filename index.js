@@ -1,33 +1,15 @@
-const express = require('express');
-const path = require('path');
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve the HTML form
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
-
   let browser = null;
   try {
     let puppeteer;
     if (process.env.VERCEL) {
-      // Use puppeteer-core on Vercel
       puppeteer = require('puppeteer-core');
       browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: process.env.CHROME_EXECUTABLE_PATH || await puppeteer.executablePath(),
         headless: true,
       });
     } else {
-      // Use regular puppeteer locally
       puppeteer = require('puppeteer');
       browser = await puppeteer.launch({
         headless: false,
@@ -95,8 +77,4 @@ app.post('/login', async (req, res) => {
       await browser.close();
     }
   }
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
 });
