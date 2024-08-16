@@ -17,6 +17,7 @@ app.post('/login', async (req, res) => {
   const { url, email, password } = req.body;
   let browser = null;
   try {
+    // Launch Puppeteer
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       headless: true,
