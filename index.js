@@ -19,8 +19,8 @@ app.post('/login', async (req, res) => {
   try {
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: '/usr/bin/google-chrome', // Set the executable path to /usr/bin/google-chrome
       headless: true,
-      cacheDirectory: '/tmp/.cache/puppeteer', // Set the cache directory to /tmp/.cache/puppeteer
     });
 
     const page = await browser.newPage();
