@@ -19,14 +19,12 @@ app.post('/login', async (req, res) => {
   try {
     let puppeteer;
     if (process.env.VERCEL) {
-      // Use chrome-aws-lambda on Vercel
+      // Use puppeteer-core on Vercel
       puppeteer = require('puppeteer-core');
-      const chromium = require('chrome-aws-lambda');
       browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath,
-        headless: chromium.headless,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: process.env.CHROME_EXECUTABLE_PATH || await puppeteer.executablePath(),
+        headless: true,
       });
     } else {
       // Use regular puppeteer locally
