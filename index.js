@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const chromium = require('chrome-aws-lambda');
+const chromium = require('@sparticuz/chromium-min');
 const puppeteer = require('puppeteer-core');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +20,7 @@ app.post('/login', async (req, res) => {
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+      executablePath: await chromium.executablePath(),
       headless: chromium.headless,
       ignoreHTTPSErrors: true,
     });
