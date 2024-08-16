@@ -1,5 +1,4 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
 const path = require('path');
 
 const app = express();
@@ -18,14 +17,28 @@ app.post('/login', async (req, res) => {
 
   let browser = null;
   try {
-    const launchOptions = {
-      headless: false,  // Run in non-headless mode
-      slowMo: 100,  // Slow down operations by 100ms
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      ignoreHTTPSErrors: true,
-    };
+    let puppeteer;
+    if (process.env.VERCEL) {
+      // Use chrome-aws-lambda on Vercel
+      puppeteer = require('puppeteer-core');
+      const chromium = require('chrome-aws-lambda');
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless,
+      });
+    } else {
+      // Use regular puppeteer locally
+      puppeteer = require('puppeteer');
+      browser = await puppeteer.launch({
+        headless: false,
+        slowMo: 100,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        ignoreHTTPSErrors: true,
+      });
+    }
 
-    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.goto(url);
 
@@ -36,7 +49,6 @@ app.post('/login', async (req, res) => {
     await page.evaluate(() => {
         [...document.querySelectorAll('div.choose-btn')].filter(el => el.innerText === 'Email')[0].click();
     });
-
 
     // Fill in email and password
     await page.waitForSelector("input[type='text'][placeholder='Please enter your email address']");
